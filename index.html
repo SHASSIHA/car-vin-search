@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>VIN Search</title>
+</head>
+
+<body style="font-family: Arial; padding: 30px;">
+
+<h2>🔍 بحث السيارة برقم الشاصي</h2>
+
+<input id="vin" placeholder="اكتب رقم الشاصي" style="width:300px; padding:10px;" />
+
+<button onclick="search()" style="padding:10px;">بحث</button>
+
+<p id="msg"></p>
+
+<script>
+function search() {
+
+    let vin = document.getElementById("vin").value;
+
+    if (!vin) {
+        alert("اكتب رقم الشاصي");
+        return;
+    }
+
+    let url = "https://onedrive.live.com/?id=" + vin;
+
+    document.getElementById("msg").innerHTML =
+        "جاري فتح ملفات السيارة...";
+
+    window.open(url, "_blank");
+}
+</script>
+
+</body>
+</html>
