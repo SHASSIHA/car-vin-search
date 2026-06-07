@@ -161,7 +161,7 @@ function showWhatsAppFallback(){
 document.getElementById("images").innerHTML = `
 <p>❌ ماكو صور متوفرة</p>
 <button onclick="sendWhatsApp()">
-📲 إرسال طلب فحص عبر واتساب
+📲 إرسال صور الفحص عبر واتساب
 </button>
 `;
 
@@ -174,7 +174,7 @@ function sendWhatsApp(){
 
 const phone = "9647812100701"; // 👈 غيّر رقمك هنا
 
-const message = `مرحبا، أريد فحص سيارة برقم الشاصي: ${currentVin}`;
+const message = `السلام عليكم، أريد فحص سيارة برقم الشاصي: ${currentVin}`;
 
 const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
