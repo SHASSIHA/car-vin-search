@@ -1,75 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>VIN Search</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VIN Intelligence App</title>
+
 <style>
-body { font-family: Arial; padding: 20px; }
-input, button { padding: 10px; width: 300px; margin: 5px 0; }
-img { width: 200px; margin: 5px; border-radius: 10px; }
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #0f172a;
+  color: white;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+.card {
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #3b82f6;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+img {
+  width: 100%;
+  border-radius: 10px;
+}
+.small {
+  opacity: 0.7;
+  font-size: 13px;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Car VIN Search</h2>
+<div class="container">
 
-<input id="vin" placeholder="Enter VIN">
+<h2>🚗 VIN Intelligence App</h2>
+<p class="small">Enter VIN to get vehicle data + images</p>
+
+<input id="vin" placeholder="Enter VIN number..." />
 <button onclick="searchVIN()">Search</button>
 
-<h3>Vehicle Info</h3>
-<div id="info"></div>
+<div class="card" id="info">Waiting for VIN...</div>
 
-<h3>Images</h3>
-<div id="images"></div>
+<div class="card">
+<h3>📸 Images</h3>
+<div class="grid" id="images"></div>
+</div>
+
+</div>
 
 <script>
+
+// =====================
+// 1. MAIN FUNCTION
+// =====================
 async function searchVIN() {
-    const vin = document.getElementById("vin").value;
 
-    if (!vin) return alert("Enter VIN");
+const vin = document.getElementById("vin").value;
+if(!vin) return alert("Enter VIN");
 
-    document.getElementById("info").innerHTML = "Loading...";
-    document.getElementById("images").innerHTML = "";
+document.getElementById("info").innerHTML = "Loading... ⏳";
+document.getElementById("images").innerHTML = "";
 
-    // 1. Get car data (FREE API - NHTSA)
-    const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`;
+// =====================
+// 2. VEHICLE DATA (NHTSA)
+// =====================
+const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`;
 
-    try {
-        const res = await fetch(url);
-        const data = await res.json();
-        const car = data.Results[0];
+try {
 
-        document.getElementById("info").innerHTML = `
-            <p><b>Make:</b> ${car.Make}</p>
-            <p><b>Model:</b> ${car.Model}</p>
-            <p><b>Year:</b> ${car.ModelYear}</p>
-            <p><b>Engine:</b> ${car.EngineModel || "N/A"}</p>
-        `;
+const res = await fetch(url);
+const data = await res.json();
+const car = data.Results[0];
 
-        // 2. Images (Google fallback search)
-        const query = vin + " car accident auction";
-        loadImages(query);
+document.getElementById("info").innerHTML = `
+<h3>🚗 Vehicle Info</h3>
+<p><b>Make:</b> ${car.Make || "-"}</p>
+<p><b>Model:</b> ${car.Model || "-"}</p>
+<p><b>Year:</b> ${car.ModelYear || "-"}</p>
+<p><b>Engine:</b> ${car.EngineModel || "-"}</p>
+<p class="small">Source: NHTSA</p>
+`;
 
-    } catch (e) {
-        document.getElementById("info").innerHTML = "Error loading data";
-    }
+// =====================
+// 3. IMAGE SEARCH (clean query)
+// =====================
+
+const query = `${car.Make} ${car.Model} accident auction damage`;
+
+loadImages(query);
+
+} catch(e){
+document.getElementById("info").innerHTML = "Error loading VIN data";
 }
 
-// simple image fetch using DuckDuckGo (works without API key)
-async function loadImages(query) {
-    const url = `https://duckduckgo.com/?q=${query}&iax=images&ia=images`;
-
-    // workaround: use google image search redirect method
-    const googleURL = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`;
-
-    const imgDiv = document.getElementById("images");
-
-    imgDiv.innerHTML = `
-        <p>Click below to view images:</p>
-        <a href="${googleURL}" target="_blank">Open Google Images</a>
-    `;
 }
+
+// =====================
+// 4. IMAGE ENGINE (Bing-style via Google CSE)
+// =====================
+async function loadImages(query){
+
+// ⚠️ ضع API key و CX هنا
+const API_KEY = "YOUR_GOOGLE_API_KEY";
+const CX = "YOUR_CX_ID";
+
+const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&cx=${CX}&key=${API_KEY}&searchType=image&num=6`;
+
+try {
+
+const res = await fetch(url);
+const data = await res.json();
+
+const container = document.getElementById("images");
+container.innerHTML = "";
+
+if(!data.items){
+container.innerHTML = "No images found";
+return;
+}
+
+data.items.forEach(img => {
+const el = document.createElement("img");
+el.src = img.link;
+container.appendChild(el);
+});
+
+} catch(e){
+document.getElementById("images").innerHTML =
+"Image loading failed";
+}
+
+}
+
 </script>
 
 </body>
