@@ -1,172 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Shassiha VIN Viewer</title>
-
+<meta charset="UTF-8">
+<title>VIN Search</title>
 <style>
-body {
-    margin: 0;
-    font-family: Arial;
-    background: #0f172a;
-    color: white;
-}
-
-.header {
-    padding: 15px;
-    text-align: center;
-    font-size: 20px;
-    background: #111827;
-}
-
-.container {
-    padding: 15px;
-}
-
-input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    font-size: 16px;
-}
-
-button {
-    width: 100%;
-    margin-top: 10px;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background: #2563eb;
-    color: white;
-    font-size: 16px;
-}
-
-.grid {
-    margin-top: 15px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-
-img {
-    width: 100%;
-    border-radius: 10px;
-}
-
-.small {
-    font-size: 12px;
-    opacity: 0.7;
-    text-align: center;
-    margin-top: 5px;
-}
+body { font-family: Arial; padding: 20px; }
+input, button { padding: 10px; width: 300px; margin: 5px 0; }
+img { width: 200px; margin: 5px; border-radius: 10px; }
 </style>
 </head>
 
 <body>
 
-<div class="header">🚗 Shassiha VIN Viewer</div>
+<h2>Car VIN Search</h2>
 
-<div class="container">
-
-<input id="vin" placeholder="Enter VIN number..." />
+<input id="vin" placeholder="Enter VIN">
 <button onclick="searchVIN()">Search</button>
-<button onclick="downloadPDF()">Download PDF</button>
 
-<div class="small" id="status"></div>
+<h3>Vehicle Info</h3>
+<div id="info"></div>
 
-<div class="grid" id="gallery"></div>
-
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<h3>Images</h3>
+<div id="images"></div>
 
 <script>
-let images = [];
-
 async function searchVIN() {
-    let vin = document.getElementById("vin").value;
-    let status = document.getElementById("status");
-    let gallery = document.getElementById("gallery");
+    const vin = document.getElementById("vin").value;
 
-    gallery.innerHTML = "";
-    images = [];
+    if (!vin) return alert("Enter VIN");
 
-    status.innerText = "Searching...";
+    document.getElementById("info").innerHTML = "Loading...";
+    document.getElementById("images").innerHTML = "";
+
+    // 1. Get car data (FREE API - NHTSA)
+    const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`;
 
     try {
-        // 1. search page
-        let res = await fetch(`https://crashescars.com/eng/search/?method=detail&vin=${vin}`);
-        let html = await res.text();
+        const res = await fetch(url);
+        const data = await res.json();
+        const car = data.Results[0];
 
-        // 2. extract uid
-        let uidMatch = html.match(/uid=([a-z0-9]+)/i);
+        document.getElementById("info").innerHTML = `
+            <p><b>Make:</b> ${car.Make}</p>
+            <p><b>Model:</b> ${car.Model}</p>
+            <p><b>Year:</b> ${car.ModelYear}</p>
+            <p><b>Engine:</b> ${car.EngineModel || "N/A"}</p>
+        `;
 
-        if (!uidMatch) {
-            status.innerText = "No results found";
-            return;
-        }
-
-        let uid = uidMatch[1];
-
-        // 3. get images page
-        let res2 = await fetch(`https://crashescars.com/listall.php?uid=${uid}`);
-        let html2 = await res2.text();
-
-        // 4. extract images
-        let regex = /https:\/\/cs\.copart\.com\/[^\"]+_ful\.jpg/g;
-        images = html2.match(regex) || [];
-
-        if (images.length === 0) {
-            status.innerText = "No images found";
-            return;
-        }
-
-        // 5. show images
-        images.forEach(img => {
-            let el = document.createElement("img");
-            el.src = img;
-            gallery.appendChild(el);
-        });
-
-        status.innerText = `Found ${images.length} images`;
+        // 2. Images (Google fallback search)
+        const query = vin + " car accident auction";
+        loadImages(query);
 
     } catch (e) {
-        status.innerText = "Error loading data";
-        console.log(e);
+        document.getElementById("info").innerHTML = "Error loading data";
     }
 }
 
-async function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    let doc = new jsPDF();
+// simple image fetch using DuckDuckGo (works without API key)
+async function loadImages(query) {
+    const url = `https://duckduckgo.com/?q=${query}&iax=images&ia=images`;
 
-    let y = 10;
+    // workaround: use google image search redirect method
+    const googleURL = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`;
 
-    for (let i = 0; i < images.length; i++) {
-        let img = await toDataURL(images[i]);
+    const imgDiv = document.getElementById("images");
 
-        doc.addImage(img, "JPEG", 10, y, 180, 100);
-        y += 110;
-
-        if (y > 250 && i !== images.length - 1) {
-            doc.addPage();
-            y = 10;
-        }
-    }
-
-    doc.save("shassiha-report.pdf");
-}
-
-function toDataURL(url) {
-    return fetch(url)
-        .then(res => res.blob())
-        .then(blob => new Promise(resolve => {
-            let reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-        }));
+    imgDiv.innerHTML = `
+        <p>Click below to view images:</p>
+        <a href="${googleURL}" target="_blank">Open Google Images</a>
+    `;
 }
 </script>
 
