@@ -1,66 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>VIN Intelligence App</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIN App</title>
 
 <style>
-body {
+body{
+  margin:0;
   font-family: Arial;
-  margin: 0;
-  background: #0f172a;
-  color: white;
+  background:#0f172a;
+  color:white;
 }
-
-.container {
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
 }
-
-.card {
-  background: #1e293b;
-  padding: 15px;
-  border-radius: 12px;
-  margin-top: 15px;
+.card{
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+  margin-top:15px;
 }
-
-input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  border: none;
-  margin-top: 10px;
+input,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
 }
-
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 8px;
-  background: #3b82f6;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
+button{
+  background:#3b82f6;
+  color:white;
+  cursor:pointer;
 }
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
-  gap: 10px;
-  margin-top: 10px;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+  margin-top:10px;
 }
-
-img {
-  width: 100%;
-  border-radius: 10px;
+img{
+  width:100%;
+  border-radius:10px;
 }
-.small {
-  opacity: 0.7;
-  font-size: 13px;
-}
+.small{opacity:0.7;font-size:12px}
 </style>
 </head>
 
@@ -69,12 +54,11 @@ img {
 <div class="container">
 
 <h2>🚗 VIN Intelligence App</h2>
-<p class="small">Enter VIN to get vehicle data + images</p>
 
-<input id="vin" placeholder="Enter VIN number..." />
+<input id="vin" placeholder="Enter VIN number">
 <button onclick="searchVIN()">Search</button>
 
-<div class="card" id="info">Waiting for VIN...</div>
+<div class="card" id="info">Enter VIN to start</div>
 
 <div class="card">
 <h3>📸 Images</h3>
@@ -85,25 +69,27 @@ img {
 
 <script>
 
-// =====================
-// 1. MAIN FUNCTION
-// =====================
-async function searchVIN() {
+let currentVin = "";
+
+// =========================
+// MAIN FUNCTION
+// =========================
+async function searchVIN(){
 
 const vin = document.getElementById("vin").value;
 if(!vin) return alert("Enter VIN");
 
+currentVin = vin;
+
 document.getElementById("info").innerHTML = "Loading... ⏳";
 document.getElementById("images").innerHTML = "";
 
-// =====================
-// 2. VEHICLE DATA (NHTSA)
-// =====================
-const url = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`;
-
+// =========================
+// 1. CAR DATA (NHTSA)
+// =========================
 try {
 
-const res = await fetch(url);
+const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`);
 const data = await res.json();
 const car = data.Results[0];
 
@@ -112,17 +98,13 @@ document.getElementById("info").innerHTML = `
 <p><b>Make:</b> ${car.Make || "-"}</p>
 <p><b>Model:</b> ${car.Model || "-"}</p>
 <p><b>Year:</b> ${car.ModelYear || "-"}</p>
-<p><b>Engine:</b> ${car.EngineModel || "-"}</p>
 <p class="small">Source: NHTSA</p>
 `;
 
-// =====================
-// 3. IMAGE SEARCH (clean query)
-// =====================
-
-const query = `${car.Make} ${car.Model} accident auction damage`;
-
-loadImages(query);
+// =========================
+// 2. IMAGE SEARCH (Google CSE)
+// =========================
+loadImages(`${car.Make} ${car.Model} accident auction damage`);
 
 } catch(e){
 document.getElementById("info").innerHTML = "Error loading VIN data";
@@ -130,41 +112,73 @@ document.getElementById("info").innerHTML = "Error loading VIN data";
 
 }
 
-// =====================
-// 4. IMAGE ENGINE (Bing-style via Google CSE)
-// =====================
+// =========================
+// 3. IMAGES + FALLBACK
+// =========================
 async function loadImages(query){
 
-// ⚠️ ضع API key و CX هنا
 const API_KEY = "YOUR_GOOGLE_API_KEY";
 const CX = "YOUR_CX_ID";
 
 const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&cx=${CX}&key=${API_KEY}&searchType=image&num=6`;
+
+const container = document.getElementById("images");
+container.innerHTML = "Loading images...";
 
 try {
 
 const res = await fetch(url);
 const data = await res.json();
 
-const container = document.getElementById("images");
 container.innerHTML = "";
 
-if(!data.items){
-container.innerHTML = "No images found";
-return;
-}
+// إذا صور موجودة
+if(data.items && data.items.length > 0){
 
-data.items.forEach(img => {
+data.items.forEach(img=>{
 const el = document.createElement("img");
 el.src = img.link;
 container.appendChild(el);
 });
 
-} catch(e){
-document.getElementById("images").innerHTML =
-"Image loading failed";
+}else{
+
+showWhatsAppFallback();
+
 }
 
+} catch(e){
+showWhatsAppFallback();
+}
+
+}
+
+// =========================
+// 4. WHATSAPP FALLBACK
+// =========================
+function showWhatsAppFallback(){
+
+document.getElementById("images").innerHTML = `
+<p>❌ ماكو صور متوفرة</p>
+<button onclick="sendWhatsApp()">
+📲 إرسال طلب فحص عبر واتساب
+</button>
+`;
+
+}
+
+// =========================
+// 5. WHATSAPP LINK
+// =========================
+function sendWhatsApp(){
+
+const phone = "9647812100701"; // 👈 غيّر رقمك هنا
+
+const message = `مرحبا، أريد فحص سيارة برقم الشاصي: ${currentVin}`;
+
+const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+window.open(url, "_blank");
 }
 
 </script>
