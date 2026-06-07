@@ -1,37 +1,174 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>VIN Search</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Shassiha VIN Viewer</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+}
+
+.header {
+    padding: 15px;
+    text-align: center;
+    font-size: 20px;
+    background: #111827;
+}
+
+.container {
+    padding: 15px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+}
+
+.grid {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.small {
+    font-size: 12px;
+    opacity: 0.7;
+    text-align: center;
+    margin-top: 5px;
+}
+</style>
 </head>
 
-<body style="font-family: Arial; padding: 30px;">
+<body>
 
-<h2>🔍 بحث السيارة برقم الشاصي</h2>
+<div class="header">🚗 Shassiha VIN Viewer</div>
 
-<input id="vin" placeholder="اكتب رقم الشاصي" style="width:300px; padding:10px;" />
+<div class="container">
 
-<button onclick="search()" style="padding:10px;">بحث</button>
+<input id="vin" placeholder="Enter VIN number..." />
+<button onclick="searchVIN()">Search</button>
+<button onclick="downloadPDF()">Download PDF</button>
 
-<p id="msg"></p>
+<div class="small" id="status"></div>
+
+<div class="grid" id="gallery"></div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-function search() {
+let images = [];
 
+async function searchVIN() {
     let vin = document.getElementById("vin").value;
+    let status = document.getElementById("status");
+    let gallery = document.getElementById("gallery");
 
-    if (!vin) {
-        alert("اكتب رقم الشاصي");
-        return;
+    gallery.innerHTML = "";
+    images = [];
+
+    status.innerText = "Searching...";
+
+    try {
+        // 1. search page
+        let res = await fetch(`https://crashescars.com/eng/search/?method=detail&vin=${vin}`);
+        let html = await res.text();
+
+        // 2. extract uid
+        let uidMatch = html.match(/uid=([a-z0-9]+)/i);
+
+        if (!uidMatch) {
+            status.innerText = "No results found";
+            return;
+        }
+
+        let uid = uidMatch[1];
+
+        // 3. get images page
+        let res2 = await fetch(`https://crashescars.com/listall.php?uid=${uid}`);
+        let html2 = await res2.text();
+
+        // 4. extract images
+        let regex = /https:\/\/cs\.copart\.com\/[^\"]+_ful\.jpg/g;
+        images = html2.match(regex) || [];
+
+        if (images.length === 0) {
+            status.innerText = "No images found";
+            return;
+        }
+
+        // 5. show images
+        images.forEach(img => {
+            let el = document.createElement("img");
+            el.src = img;
+            gallery.appendChild(el);
+        });
+
+        status.innerText = `Found ${images.length} images`;
+
+    } catch (e) {
+        status.innerText = "Error loading data";
+        console.log(e);
+    }
+}
+
+async function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF();
+
+    let y = 10;
+
+    for (let i = 0; i < images.length; i++) {
+        let img = await toDataURL(images[i]);
+
+        doc.addImage(img, "JPEG", 10, y, 180, 100);
+        y += 110;
+
+        if (y > 250 && i !== images.length - 1) {
+            doc.addPage();
+            y = 10;
+        }
     }
 
-    let url = "https://onedrive.live.com/?id=" + vin;
+    doc.save("shassiha-report.pdf");
+}
 
-    document.getElementById("msg").innerHTML =
-        "جاري فتح ملفات السيارة...";
-
-    window.open(url, "_blank");
+function toDataURL(url) {
+    return fetch(url)
+        .then(res => res.blob())
+        .then(blob => new Promise(resolve => {
+            let reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        }));
 }
 </script>
 
 </body>
-</html> 
+</html>
