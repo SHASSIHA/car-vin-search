@@ -179,7 +179,7 @@ showWhatsApp();
 function showWhatsApp(){
 
 document.getElementById("images").innerHTML = `
-<p>❌ No accident images found</p>
+<p>📸 الصورمقفولة</p>
 <button onclick="sendWhatsApp()">
 📲 Request Full Report
 </button>
@@ -194,7 +194,7 @@ function sendWhatsApp(){
 
 const phone = "9647812100701"; // غيّر رقمك
 
-const msg = `Hello, I need vehicle report for VIN: ${currentVIN}`;
+const msg = `السلام عليكم,اريد افحص سيارتي برقم الشاصي: ${currentVIN}`;
 
 window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,"_blank");
 
