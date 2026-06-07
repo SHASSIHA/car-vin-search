@@ -3,62 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIN App</title>
+<title>VIN System</title>
 
 <style>
 body{
-  margin:0;
-  font-family: Arial;
-  background:#0f172a;
-  color:white;
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
 }
 .container{
-  max-width:900px;
-  margin:auto;
-  padding:20px;
+max-width:900px;
+margin:auto;
+padding:20px;
 }
 .card{
-  background:#1e293b;
-  padding:15px;
-  border-radius:12px;
-  margin-top:15px;
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+margin-top:15px;
 }
 input,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border:none;
-  border-radius:8px;
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:8px;
 }
 button{
-  background:#3b82f6;
-  color:white;
-  cursor:pointer;
+background:#3b82f6;
+color:white;
+cursor:pointer;
 }
 .grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:10px;
-  margin-top:10px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+gap:10px;
+margin-top:10px;
 }
 img{
-  width:100%;
-  border-radius:10px;
+width:100%;
+border-radius:10px;
 }
-.small{opacity:0.7;font-size:12px}
+.small{font-size:12px;opacity:0.7}
 </style>
+
 </head>
 
 <body>
 
 <div class="container">
 
-<h2>🚗 VIN Intelligence App</h2>
+<h2>🚗 VIN Intelligence System</h2>
 
 <input id="vin" placeholder="Enter VIN number">
 <button onclick="searchVIN()">Search</button>
 
-<div class="card" id="info">Enter VIN to start</div>
+<div class="card" id="info">Waiting...</div>
 
 <div class="card">
 <h3>📸 Images</h3>
@@ -69,7 +70,15 @@ img{
 
 <script>
 
-let currentVin = "";
+// =========================
+// CONFIG
+// =========================
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxmRilWm4Y0WYU9EnTmafJ_7ci1EKMXQ3DTNUA749do_wLN7R3KtqqYzBdGbVO6aCy9/exec";
+
+const API_KEY = ""; // Google CSE (اختياري)
+const CX = "";      // اختياري
+
+let currentVIN = "";
 
 // =========================
 // MAIN FUNCTION
@@ -79,15 +88,16 @@ async function searchVIN(){
 const vin = document.getElementById("vin").value;
 if(!vin) return alert("Enter VIN");
 
-currentVin = vin;
+currentVIN = vin;
 
-document.getElementById("info").innerHTML = "Loading... ⏳";
+document.getElementById("info").innerHTML = "Loading...";
 document.getElementById("images").innerHTML = "";
 
-// =========================
-// 1. CAR DATA (NHTSA)
-// =========================
-try {
+// save to sheet instantly
+saveToSheet(vin);
+
+// get car data
+try{
 
 const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`);
 const data = await res.json();
@@ -101,39 +111,51 @@ document.getElementById("info").innerHTML = `
 <p class="small">Source: NHTSA</p>
 `;
 
-// =========================
-// 2. IMAGE SEARCH (Google CSE)
-// =========================
 loadImages(`${car.Make} ${car.Model} accident auction damage`);
 
-} catch(e){
-document.getElementById("info").innerHTML = "Error loading VIN data";
+}catch(e){
+document.getElementById("info").innerHTML = "Error loading data";
 }
 
 }
 
 // =========================
-// 3. IMAGES + FALLBACK
+// SAVE TO GOOGLE SHEET
+// =========================
+async function saveToSheet(vin){
+
+fetch(SHEET_URL,{
+method:"POST",
+body:JSON.stringify({
+vin:vin,
+source:"VIN_APP"
+})
+});
+
+}
+
+// =========================
+// LOAD IMAGES
 // =========================
 async function loadImages(query){
 
-const API_KEY = "YOUR_GOOGLE_API_KEY";
-const CX = "YOUR_CX_ID";
+const container = document.getElementById("images");
+
+if(!API_KEY || !CX){
+showWhatsApp();
+return;
+}
 
 const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&cx=${CX}&key=${API_KEY}&searchType=image&num=6`;
 
-const container = document.getElementById("images");
-container.innerHTML = "Loading images...";
-
-try {
+try{
 
 const res = await fetch(url);
 const data = await res.json();
 
 container.innerHTML = "";
 
-// إذا صور موجودة
-if(data.items && data.items.length > 0){
+if(data.items && data.items.length>0){
 
 data.items.forEach(img=>{
 const el = document.createElement("img");
@@ -142,43 +164,40 @@ container.appendChild(el);
 });
 
 }else{
-
-showWhatsAppFallback();
-
+showWhatsApp();
 }
 
-} catch(e){
-showWhatsAppFallback();
+}catch(e){
+showWhatsApp();
 }
 
 }
 
 // =========================
-// 4. WHATSAPP FALLBACK
+// WHATSAPP FALLBACK
 // =========================
-function showWhatsAppFallback(){
+function showWhatsApp(){
 
 document.getElementById("images").innerHTML = `
-<p>📸 الصور مقفولة</p>
+<p>❌ No accident images found</p>
 <button onclick="sendWhatsApp()">
-📲 إرسال طلب فتح الصور عبر واتساب
+📲 Request Full Report
 </button>
 `;
 
 }
 
 // =========================
-// 5. WHATSAPP LINK
+// WHATSAPP
 // =========================
 function sendWhatsApp(){
 
-const phone = "9647812100701"; // 👈 غيّر رقمك هنا
+const phone = "9647812100701"; // غيّر رقمك
 
-const message = `السلام عليكم، أريد فحص سيارة برقم الشاصي: ${currentVin}`;
+const msg = `Hello, I need vehicle report for VIN: ${currentVIN}`;
 
-const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,"_blank");
 
-window.open(url, "_blank");
 }
 
 </script>
