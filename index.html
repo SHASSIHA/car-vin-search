@@ -136,7 +136,7 @@ const data = await res.json();
 const car = data.Results[0];
 
 document.getElementById("info").innerHTML = `
-<h3>🚗 Vehicle Info</h3>
+<h3>اطلب ترير من شاصيها الان</h3>
 <p><b>Make:</b> ${car.Make || "-"}</p>
 <p><b>Model:</b> ${car.Model || "-"}</p>
 <p><b>Year:</b> ${car.ModelYear || "-"}</p>
@@ -213,7 +213,7 @@ function showWhatsApp(){
 document.getElementById("images").innerHTML = `
 <p>📸 الصورمقفولة</p>
 <button onclick="sendWhatsApp()">
-طلب التقرير  < 
+طلب التقرير  <    
 </button>
 `;
 
