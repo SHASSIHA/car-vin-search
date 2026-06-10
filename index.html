@@ -86,7 +86,7 @@ button{
 
 <div class="container">
 
-<h2>🚗 VIN Intelligence System</h2>
+<h2>اطلب تقرير من شاصيها الان</h2>
 
 <input id="vin" placeholder="Enter VIN number">
 <button onclick="searchVIN()">Search</button>
@@ -136,7 +136,7 @@ const data = await res.json();
 const car = data.Results[0];
 
 document.getElementById("info").innerHTML = `
-<h3>اطلب ترير من شاصيها الان</h3>
+<h3>معلومات سيارتك</h3>
 <p><b>Make:</b> ${car.Make || "-"}</p>
 <p><b>Model:</b> ${car.Model || "-"}</p>
 <p><b>Year:</b> ${car.ModelYear || "-"}</p>
@@ -213,7 +213,7 @@ function showWhatsApp(){
 document.getElementById("images").innerHTML = `
 <p>📸 الصورمقفولة</p>
 <button onclick="sendWhatsApp()">
-طلب التقرير  <    
+اطلب التقرير الان !    
 </button>
 `;
 
