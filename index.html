@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIN System</title>
+<title>فحص رقم الشاصي | شاصيها</title>
 
 <style>
 *{
@@ -19,12 +19,12 @@ body{
   min-height:100vh;
 }
 
-/* ===== HEADER (LOGO STYLE مثل الماب) ===== */
+/* ===== HEADER ===== */
 .header{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:20px;
+  padding:18px;
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(10px);
   border-bottom:1px solid rgba(255,255,255,0.1);
@@ -36,15 +36,24 @@ body{
   letter-spacing:1px;
 }
 
-/* ===== SEARCH CARD ===== */
-.search-box{
-  max-width:500px;
+/* ===== MAIN CONTAINER ===== */
+.container{
+  max-width:600px;
   margin:30px auto;
-  padding:20px;
+  padding:15px;
+}
+
+/* ===== SEARCH BOX ===== */
+.search-box{
   background: rgba(255,255,255,0.08);
+  padding:20px;
   border-radius:16px;
   box-shadow:0 10px 30px rgba(0,0,0,0.3);
   backdrop-filter: blur(10px);
+}
+
+.search-box h3{
+  margin-bottom:10px;
 }
 
 .search-box input{
@@ -56,21 +65,27 @@ body{
   margin-top:10px;
 }
 
-/* ===== RESULT CARDS (مثل الماب) ===== */
+/* ===== BUTTON ===== */
+button{
+  width:100%;
+  margin-top:12px;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  color:#000;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* ===== RESULT CARD ===== */
 .result-card{
-  max-width:500px;
-  margin:15px auto;
+  margin-top:20px;
   padding:15px;
   background: rgba(255,255,255,0.08);
   border-radius:14px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.25);
   border:1px solid rgba(255,255,255,0.1);
-  transition:0.3s;
-}
-
-.result-card:hover{
-  transform: translateY(-3px);
-  background: rgba(255,255,255,0.12);
+  box-shadow:0 8px 20px rgba(0,0,0,0.25);
 }
 
 .badge{
@@ -81,161 +96,56 @@ body{
   background:#22c55e;
   color:#000;
   font-weight:bold;
+  margin-bottom:10px;
+}
+
+.hidden{
+  display:none;
 }
 </style>
-
 </head>
 
 <body>
 
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">SHASSIHA VIN CHECK</div>
+</div>
+
+<!-- MAIN -->
 <div class="container">
 
-<h2>🚗 VIN Intelligence System</h2>
+  <!-- SEARCH -->
+  <div class="search-box">
+    <h3>فحص رقم الشاصي</h3>
+    <input type="text" id="vinInput" placeholder="اكتب رقم VIN هنا">
+    <button onclick="searchVIN()">بحث</button>
+  </div>
 
-<input id="vin" placeholder="Enter VIN number">
-<button onclick="searchVIN()">Search</button>
-
-<div class="card" id="info">Waiting...</div>
-
-<div class="card">
-<h3>📸 Images</h3>
-<div class="grid" id="images"></div>
-</div>
+  <!-- RESULT -->
+  <div id="result" class="result-card hidden">
+    <div class="badge">RESULT</div>
+    <h3 id="carName">-</h3>
+    <p id="carInfo">-</p>
+  </div>
 
 </div>
 
 <script>
+function searchVIN(){
+  let vin = document.getElementById("vinInput").value;
 
-// =========================
-// CONFIG
-// =========================
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxmRilWm4Y0WYU9EnTmafJ_7ci1EKMXQ3DTNUA749do_wLN7R3KtqqYzBdGbVO6aCy9/exec";
+  if(vin.length < 5){
+    alert("اكتب رقم VIN صحيح");
+    return;
+  }
 
-const API_KEY = ""; // Google CSE (اختياري)
-const CX = "";      // اختياري
+  // مثال بيانات (تبدلها بالـ API مالك)
+  document.getElementById("carName").innerText = "Toyota Camry 2020";
+  document.getElementById("carInfo").innerText = "Clean - No accidents - USA Import";
 
-let currentVIN = "";
-
-// =========================
-// MAIN FUNCTION
-// =========================
-async function searchVIN(){
-
-const vin = document.getElementById("vin").value;
-if(!vin) return alert("Enter VIN");
-
-currentVIN = vin;
-
-document.getElementById("info").innerHTML = "Loading...";
-document.getElementById("images").innerHTML = "";
-
-// save to sheet instantly
-saveToSheet(vin);
-
-// get car data
-try{
-
-const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`);
-const data = await res.json();
-const car = data.Results[0];
-
-document.getElementById("info").innerHTML = `
-<h3>🚗 Vehicle Info</h3>
-<p><b>Make:</b> ${car.Make || "-"}</p>
-<p><b>Model:</b> ${car.Model || "-"}</p>
-<p><b>Year:</b> ${car.ModelYear || "-"}</p>
-<p class="small">Source: NHTSA</p>
-`;
-
-loadImages(`${car.Make} ${car.Model} accident auction damage`);
-
-}catch(e){
-document.getElementById("info").innerHTML = "Error loading data";
+  document.getElementById("result").classList.remove("hidden");
 }
-
-}
-
-// =========================
-// SAVE TO GOOGLE SHEET
-// =========================
-async function saveToSheet(vin){
-
-fetch(SHEET_URL,{
-method:"POST",
-body:JSON.stringify({
-vin:vin,
-source:"VIN_APP"
-})
-});
-
-}
-
-// =========================
-// LOAD IMAGES
-// =========================
-async function loadImages(query){
-
-const container = document.getElementById("images");
-
-if(!API_KEY || !CX){
-showWhatsApp();
-return;
-}
-
-const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&cx=${CX}&key=${API_KEY}&searchType=image&num=6`;
-
-try{
-
-const res = await fetch(url);
-const data = await res.json();
-
-container.innerHTML = "";
-
-if(data.items && data.items.length>0){
-
-data.items.forEach(img=>{
-const el = document.createElement("img");
-el.src = img.link;
-container.appendChild(el);
-});
-
-}else{
-showWhatsApp();
-}
-
-}catch(e){
-showWhatsApp();
-}
-
-}
-
-// =========================
-// WHATSAPP FALLBACK
-// =========================
-function showWhatsApp(){
-
-document.getElementById("images").innerHTML = `
-<p>📸 الصورمقفولة</p>
-<button onclick="sendWhatsApp()">
-📲 Request Full Report
-</button>
-`;
-
-}
-
-// =========================
-// WHATSAPP
-// =========================
-function sendWhatsApp(){
-
-const phone = "9647812100701"; // غيّر رقمك
-
-const msg = `السلام عليكم,اريد افحص سيارتي برقم الشاصي: ${currentVIN}`;
-
-window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,"_blank");
-
-}
-
 </script>
 
 </body>
