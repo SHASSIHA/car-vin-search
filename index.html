@@ -40,12 +40,27 @@ body{
   border-bottom:1px solid #ffe0c2;
 }
 
+/* 🔥 هذا الشكل الاحترافي الحقيقي */
 .app-logo{
-  height:48px;
-  width:48px;
-  border-radius:12px;
-  object-fit:cover;
-  box-shadow:0 6px 15px rgba(0,0,0,0.2);
+  height:46px;
+  width:auto;
+  max-width:180px;
+
+  object-fit:contain;
+
+  /* بدون خلفية نهائياً */
+  background:transparent;
+  padding:0;
+  border-radius:0;
+
+  /* ظل خفيف يعطيه فخامة مثل التطبيقات */
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+
+  transition:0.3s;
+}
+
+.app-logo:hover{
+  transform: scale(1.05);
 }
 
 /* ===== CONTENT ===== */
@@ -112,7 +127,7 @@ button{
 
   <!-- HEADER -->
   <div class="header">
-    <img src="logo.png" class="app-logo" alt="logo">
+   <img src="logo.png" class="app-logo">
   </div>
 
   <!-- CONTENT -->
