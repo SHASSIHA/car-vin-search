@@ -167,7 +167,8 @@ const vin = document.getElementById("vin").value;
 if(!vin) return alert("Enter VIN");
 
 currentVIN = vin;
-
+document.getElementById("vin").style.display = "none";
+document.querySelector("button").style.display = "none";
 document.getElementById("info").innerHTML = "Loading...";
 document.getElementById("images").innerHTML = "";
 
@@ -183,9 +184,15 @@ const car = data.Results[0];
 
 document.getElementById("info").innerHTML = `
 <h3>معلومات سيارتك</h3>
+
+<p><b>VIN:</b> ${vin}</p>
+
 <p><b>Make:</b> ${car.Make || "-"}</p>
+
 <p><b>Model:</b> ${car.Model || "-"}</p>
+
 <p><b>Year:</b> ${car.ModelYear || "-"}</p>
+
 <p class="small">Source: NHTSA</p>
 `;
 
