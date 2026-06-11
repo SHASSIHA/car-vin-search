@@ -95,11 +95,14 @@ button{
 </head>
 
 <body>
-  <img src="./logo.png">
-  
-<div class="app">
-<div class="container">
 
+<div class="app">
+
+<div class="header">
+  <img src="./logo.png" class="logo">
+</div>
+
+<div class="container">
 <h2>اطلب تقرير من شاصيها الان</h2>
 
 <input id="vin" placeholder="Enter VIN number">
@@ -115,17 +118,7 @@ button{
 </div>
 </div>
 <script>
-<footer style="
-margin-top:40px;
-padding:20px;
-font-size:14px;
-color:#6b7280;
-text-align:center;
-">
 
-Powered by <b>SHASSIHA</b> © 2026
-
-</footer>
 // =========================
 // CONFIG
 // =========================
@@ -256,7 +249,15 @@ window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,"_blank");
 
 }
 
-</script>
+</div>
+
+<div class="footer">
+Powered by <b>SHASSIHA</b> © 2026
+</div>
+
+</div>
+
+<script>
 
 </body>
 </html>
