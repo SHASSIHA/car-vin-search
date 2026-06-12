@@ -115,7 +115,9 @@ button{
 
 <input id="vin" placeholder="Enter VIN number">
 <button id="searchBtn" onclick="searchVIN()">Search</button>
-
+<button id="resetBtn" onclick="resetApp()" style="display:none;">
+  بحث جديد
+</button>
 <div class="card" id="info">Waiting...</div>
 
 <div class="card">
@@ -153,7 +155,7 @@ document.getElementById("searchBtn").style.display = "none";
 
 document.getElementById("info").innerHTML = "Loading...";
 document.getElementById("images").innerHTML = "";
-
+document.getElementById("resetBtn").style.display = "block";
 saveToSheet(vin);
 
 try{
@@ -243,7 +245,19 @@ const msg = `السلام عليكم، اريد فحص سيارة برقم ال�
 window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,"_blank");
 
 }
+function resetApp(){
 
+document.getElementById("vin").value = "";
+document.getElementById("vin").style.display = "block";
+
+document.getElementById("searchBtn").style.display = "block";
+document.getElementById("resetBtn").style.display = "none";
+
+document.getElementById("info").innerHTML = "Waiting...";
+document.getElementById("images").innerHTML = "";
+
+currentVIN = "";
+}
 </script>
 
 </body>
