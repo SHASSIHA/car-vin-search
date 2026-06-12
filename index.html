@@ -148,6 +148,7 @@ if(!vin) return alert("Enter VIN");
 currentVIN = vin;
 
 // hide only search button (مو كل الأزرار)
+document.getElementById("vin").style.display = "none";
 document.getElementById("searchBtn").style.display = "none";
 
 document.getElementById("info").innerHTML = "Loading...";
