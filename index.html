@@ -132,9 +132,9 @@ button{
 <button id="resetBtn" onclick="resetApp()" style="display:none;">
   بحث جديد
 </button>
-<div class="card" id="info">Waiting...</div>
+<div class="card" id="info" style="display:none;"></div>
 
-<div class="card">
+<div class="card" id="imagesCard" style="display:none;">
   <h3>Images</h3>
   <div class="grid" id="images"></div>
 </div>
@@ -162,7 +162,13 @@ const vin = document.getElementById("vin").value;
 if(!vin) return alert("Enter VIN");
 
 currentVIN = vin;
+document.getElementById("info").style.display = "block";
+document.getElementById("imagesCard").style.display = "block";
 
+document.getElementById("info").innerHTML = `
+<div class="loader"></div>
+<p style="text-align:center">جاري فحص رقم الشاصي...</p>
+`;
 // hide only search button (مو كل الأزرار)
 document.getElementById("vin").style.display = "none";
 document.getElementById("searchBtn").style.display = "none";
@@ -280,21 +286,22 @@ window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,"_blank");
 function resetApp(){
 
 document.getElementById("vin").value = "";
-document.getElementById("vin").style.display = "block";
 
+document.getElementById("vin").style.display = "block";
 document.getElementById("searchBtn").style.display = "block";
+
 document.getElementById("resetBtn").style.display = "none";
 
-document.getElementById("info").innerHTML = `
-<div class="loader"></div>
-<p style="text-align:center;margin-top:10px;">Loading...</p>
-`;
+document.getElementById("info").style.display = "none";
+document.getElementById("imagesCard").style.display = "none";
+
+document.getElementById("info").innerHTML = "";
 document.getElementById("images").innerHTML = "";
 
 currentVIN = "";
 
-// مهم: ترجع الفوكس للحقل
 document.getElementById("vin").focus();
+
 }
 </script>
 
