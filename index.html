@@ -178,10 +178,17 @@ const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues
 const data = await res.json();
 const car = data.Results[0];
 
-const engine =
-  car.DisplacementL
-    ? `${car.DisplacementL}L ${car.EngineCylinders ? "V"+car.EngineCylinders : ""}`
-    : "-";
+const engineSize =
+  car.DisplacementL ||
+  car.DisplacementCC
+    ? `${car.DisplacementL || (car.DisplacementCC/1000).toFixed(1)}L`
+    : "";
+
+const cylinders = car.EngineCylinders || "";
+
+const driveType = car.DriveType || "";
+const fuelType = car.FuelTypePrimary || "";
+const bodyClass = car.BodyClass || "";
 
 document.getElementById("info").innerHTML = `
 <h3>معلومات السيارة</h3>
@@ -191,17 +198,14 @@ document.getElementById("info").innerHTML = `
 <p><b>🚙 الموديل:</b> ${car.Model || "-"}</p>
 <p><b>📅 السنة:</b> ${car.ModelYear || "-"}</p>
 
-${engine !== "-" ? `<p><b>⛽ المحرك:</b> ${engine}</p>` : ""}
+${engineSize ? `<p><b>⛽ المحرك:</b> ${engineSize} ${cylinders ? "V"+cylinders : ""}</p>` : ""}
 
-${car.FuelTypePrimary ? `<p><b>⛽ الوقود:</b> ${car.FuelTypePrimary}</p>` : ""}
+${fuelType ? `<p><b>⛽ الوقود:</b> ${fuelType}</p>` : ""}
 
-${car.DriveType ? `<p><b>⚙️ الدفع:</b> ${car.DriveType}</p>` : ""}
+${driveType ? `<p><b>⚙️ الدفع:</b> ${driveType}</p>` : ""}
 
-${car.BodyClass ? `<p><b>🚘 الفئة:</b> ${car.BodyClass}</p>` : ""}
-
+${bodyClass ? `<p><b>🚘 الفئة:</b> ${bodyClass}</p>` : ""}
 `;
-`;
-
 loadImages(`${car.Make} ${car.Model} accident damage auction`);
 
 }catch(e){
