@@ -194,17 +194,17 @@ document.getElementById("info").innerHTML = `
 <h3>معلومات السيارة</h3>
 
 <p><b>VIN:</b> ${vin}</p>
-<p><b>🚗 الشركة:</b> ${car.Make || "-"}</p>
-<p><b>🚙 الموديل:</b> ${car.Model || "-"}</p>
-<p><b>📅 السنة:</b> ${car.ModelYear || "-"}</p>
+<p><b>Make:</b> ${car.Make || "-"}</p>
+<p><b>Model:</b> ${car.Model || "-"}</p>
+<p><b>ModelYear:</b> ${car.ModelYear || "-"}</p>
 
-${engineSize ? `<p><b>⛽ المحرك:</b> ${engineSize} ${cylinders ? "V"+cylinders : ""}</p>` : ""}
+${engineSize ? `<p><b>engineSize:</b> ${engineSize} ${cylinders ? "V"+cylinders : ""}</p>` : ""}
 
-${fuelType ? `<p><b>⛽ الوقود:</b> ${fuelType}</p>` : ""}
+${fuelType ? `<p><b>fuelType:</b> ${fuelType}</p>` : ""}
 
-${driveType ? `<p><b>⚙️ الدفع:</b> ${driveType}</p>` : ""}
+${driveType ? `<p><b>⚙️ driveType:</b> ${driveType}</p>` : ""}
 
-${bodyClass ? `<p><b>🚘 الفئة:</b> ${bodyClass}</p>` : ""}
+//${bodyClass ? `<p><b>🚘 الفئة:</b> ${bodyClass}</p>` : ""}//
 `;
 loadImages(`${car.Make} ${car.Model} accident damage auction`);
 
