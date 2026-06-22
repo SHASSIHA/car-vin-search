@@ -170,7 +170,12 @@ if(!vin) return alert("Enter VIN");
 currentVIN = vin;
 document.getElementById("info").style.display = "block";
 document.getElementById("imagesCard").style.display = "block";
+document.getElementById("info").innerHTML = `
+<div class="loader"></div>
+<p style="text-align:center">جاري فحص رقم الشاصي...</p>
+`;
 
+await new Promise(resolve => setTimeout(resolve, 1000));
 document.getElementById("info").innerHTML = `
 <div class="loader"></div>
 <p style="text-align:center">جاري فحص رقم الشاصي...</p>
