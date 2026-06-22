@@ -178,14 +178,28 @@ const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues
 const data = await res.json();
 const car = data.Results[0];
 
+const engine =
+  car.DisplacementL
+    ? `${car.DisplacementL}L ${car.EngineCylinders ? "V"+car.EngineCylinders : ""}`
+    : "-";
+
 document.getElementById("info").innerHTML = `
 <h3>معلومات السيارة</h3>
 
 <p><b>VIN:</b> ${vin}</p>
-<p><b>Make:</b> ${car.Make || "-"}</p>
-<p><b>Model:</b> ${car.Model || "-"}</p>
-<p><b>Year:</b> ${car.ModelYear || "-"}</p>
+<p><b>🚗 الشركة:</b> ${car.Make || "-"}</p>
+<p><b>🚙 الموديل:</b> ${car.Model || "-"}</p>
+<p><b>📅 السنة:</b> ${car.ModelYear || "-"}</p>
 
+${engine !== "-" ? `<p><b>⛽ المحرك:</b> ${engine}</p>` : ""}
+
+${car.FuelTypePrimary ? `<p><b>⛽ الوقود:</b> ${car.FuelTypePrimary}</p>` : ""}
+
+${car.DriveType ? `<p><b>⚙️ الدفع:</b> ${car.DriveType}</p>` : ""}
+
+${car.BodyClass ? `<p><b>🚘 الفئة:</b> ${car.BodyClass}</p>` : ""}
+
+`;
 `;
 
 loadImages(`${car.Make} ${car.Model} accident damage auction`);
