@@ -181,7 +181,8 @@ document.getElementById("info").innerHTML = "Loading...";
 document.getElementById("images").innerHTML = "";
 document.getElementById("resetBtn").style.display = "block";
 saveToSheet(vin);
-
+await new Promise(resolve => setTimeout(resolve, 2000));
+  
 try{
 
 const res = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`);
