@@ -168,27 +168,22 @@ const vin = document.getElementById("vin").value;
 if(!vin) return alert("Enter VIN");
 
 currentVIN = vin;
-document.getElementById("info").style.display = "block";
-document.getElementById("imagesCard").style.display = "block";
-document.getElementById("info").innerHTML = `
-<div class="loader"></div>
-<p style="text-align:center">جاري فحص رقم الشاصي...</p>
-`;
-document.getElementById("info").innerHTML = `
-<div class="loader"></div>
-<p style="text-align:center">جاري فحص رقم الشاصي...</p>
-`;
-document.getElementById("info").innerHTML = `
-<div class="loader"></div>
-<p style="text-align:center">جاري فحص رقم الشاصي...</p>
-`;
-// hide only search button (مو كل الأزرار)
+
 document.getElementById("vin").style.display = "none";
 document.getElementById("searchBtn").style.display = "none";
 
-document.getElementById("info").innerHTML = "Loading...";
-document.getElementById("images").innerHTML = "";
 document.getElementById("resetBtn").style.display = "block";
+
+document.getElementById("info").style.display = "block";
+document.getElementById("imagesCard").style.display = "none";
+
+document.getElementById("images").innerHTML = "";
+
+document.getElementById("info").innerHTML = `
+<div class="loader"></div>
+<p style="text-align:center">جاري فحص رقم الشاصي...</p>
+`;
+
 saveToSheet(vin);
 await new Promise(resolve => setTimeout(resolve, 2000));
   
