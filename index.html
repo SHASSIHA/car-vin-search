@@ -109,11 +109,6 @@ animation:spin 1s linear infinite;
 display:block;
 }
 
-@keyframes spin{
-0%{transform:rotate(0deg);}
-100%{transform:rotate(360deg);}
-}
-
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -141,7 +136,7 @@ display:block;
 <div class="card" id="info" style="display:none;"></div>
 
 <div class="card" id="imagesCard" style="display:none;">
-  <h3>Images</h3>
+  <h3>التقرير الكامل</h3>
   <div class="grid" id="images"></div>
 </div>
 
@@ -221,6 +216,7 @@ ${driveType ? `<p><b>DriveType:</b> ${driveType}</p>` : ""}
 
 ${bodyClass ? `<p><b>BodyClass:</b> ${bodyClass}</p>` : ""}
 `;
+document.getElementById("imagesCard").style.display = "block";
 loadImages(`${car.Make} ${car.Model} accident damage auction`);
 
 }catch(e){
@@ -278,7 +274,8 @@ showWhatsApp();
 function showWhatsApp(){
 
 document.getElementById("images").innerHTML = `
-<p>📸 الصور مقفولة</p>
+<p> الصور والتقرير التفصيلي غير متاحين مجاناً
+</p>
 <button onclick="sendWhatsApp()">اطلب التقرير الان</button>
 `;
 
